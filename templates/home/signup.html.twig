@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Page d'Inscription{% endblock %}
+
+{% block body %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-5">
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-5">
+                <h1 class="text-center text-primary mb-4">Créer un compte</h1>
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="inputName" class="form-label">Nom Complet</label>
+                        <input type="text" name="name" id="inputName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputEmail" class="form-label">Email</label>
+                        <input type="email" name="email" id="inputEmail" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputPassword" class="form-label">Mot de passe</label>
+                        <input type="password" name="password" id="inputPassword" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputPasswordConfirm" class="form-label">Confirmer le mot de passe</label>
+                        <input type="password" name="password_confirm" id="inputPasswordConfirm" class="form-control"
+                            required>
+                    </div>
+                    <button class="btn btn-success w-100" type="submit">S'inscrire</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

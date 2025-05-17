@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Page de Connexion{% endblock %}
+
+{% block body %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-5">
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4 text-primary">Connexion</h2>
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="inputEmail" class="form-label">Email</label>
+                        <input type="email" name="email" id="inputEmail" class="form-control" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label for="inputPassword" class="form-label">Mot de passe</label>
+                        <input type="password" name="password" id="inputPassword" class="form-control" required>
+                    </div>
+                    <button class="btn btn-primary w-100 mb-3" type="submit">Se connecter</button>
+                </form>
+                <div class="text-center">
+                    <p>Pas encore de compte ?  
+                        <a href="{{ path('app_signup') }}" class="btn btn-outline-success ms-2">Inscrivez-vous ici</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
