@@ -20,10 +20,9 @@ final class HomeController extends AbstractController
         return $this->render('home/signup.html.twig');
     }
 
-    #[Route('/', name:'app_homr')]
+    #[Route('/', name:'app_home')]
     public function home() : Response
     {
         return $this->render('home/home.html.twig');
     }
-
 }
