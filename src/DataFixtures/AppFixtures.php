@@ -33,6 +33,9 @@ class AppFixtures extends Fixture
             $article->setUpdatedAt(null);
 
             $article->setCategory($categories[array_rand($categories)]);
+
+            $article->setImage($faker->imageUrl(640, 480, 'cats', true));
+
             $manager->persist($article);
 
             $articles[] = $article;
