@@ -3,32 +3,36 @@
 {% block title %}Article{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <h1 class="text-center mb-4 display-5">Titre de l'Article</h1>
-    <div class="text-center mb-5">
-        <p class="fs-5">Description de l'article, avec un texte plus grand pour être lisible sur mobile.</p>
-    </div>
-    <h3 class="text-center mb-4 fs-4">Commentaires :</h3>
-    <ul class="list-group mb-5">
-        <li class="list-group-item fs-5"><strong>Auteur 1 :</strong> Super article, merci pour le partage !</li>
-        <li class="list-group-item fs-5"><strong>Auteur 2 :</strong> Très intéressant, j'ai appris beaucoup de choses.</li>
-        <li class="list-group-item fs-5"><strong>Auteur 3 :</strong> Hâte de lire la suite !</li>
-    </ul>
+    <h1>Article</h1>
 
-    <h4 class="text-center mb-4 fs-4">Ajouter un commentaire :</h4>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ article.id }}</td>
+            </tr>
+            <tr>
+                <th>Title</th>
+                <td>{{ article.title }}</td>
+            </tr>
+            <tr>
+                <th>Content</th>
+                <td>{{ article.content }}</td>
+            </tr>
+            <tr>
+                <th>CreatedAt</th>
+                <td>{{ article.createdAt ? article.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>UpdatedAt</th>
+                <td>{{ article.updatedAt ? article.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
 
-    <form>
-        <div class="mb-3">
-            <label for="author" class="form-label fs-5">Nom :</label>
-            <input type="text" id="author" class="form-control" placeholder="Votre nom">
-        </div>
-        <div class="mb-3">
-            <label for="comment" class="form-label fs-5">Commentaire :</label>
-            <textarea id="comment" class="form-control" rows="4" placeholder="Votre commentaire"></textarea>
-        </div>
-        <div class="text-center mb-5 mt-5">
-            <button class="btn btn-success btn-lg">Commenter</button>
-        </div>
-    </form>
-</div>
+    <a href="{{ path('app_article_index') }}">back to list</a>
+
+    <a href="{{ path('app_article_edit', {'id': article.id}) }}">edit</a>
+
+    {{ include('article/_delete_form.html.twig') }}
 {% endblock %}

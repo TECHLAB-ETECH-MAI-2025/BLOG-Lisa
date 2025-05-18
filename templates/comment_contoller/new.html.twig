@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Comment{% endblock %}
+
+{% block body %}
+    <h1>Create new Comment</h1>
+
+    {{ include('comment_contoller/_form.html.twig') }}
+
+    <a href="{{ path('app_comment_contoller_index') }}">back to list</a>
+{% endblock %}

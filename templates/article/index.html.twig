@@ -1,35 +1,41 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des Articles{% endblock %}
+{% block title %}Article index{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Liste des Articles</h1>
+    <h1>Article index</h1>
 
-    <div class="row justify-content-center">
-        <article class="col-md-4 mb-4">
-            <div class="card">
-                <img src="http://placehold.it/350x150" class="card-img-top" alt="Image de l'article">
-                
-                <div class="card-body">
-                    <h5 class="card-title">Titre de l'article</h5>
-                    <p class="card-text">Voici un exemple de contenu d'article. Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
-                    <a href="#" class="btn btn-primary">Lire la suite</a>
-                </div>
-            </div>
-        </article>
-        <article class="col-md-4 mb-4">
-            <div class="card">
-                
-                <img src="http://placehold.it/350x150" class="card-img-top" alt="Image de l'article">
-                
-                <div class="card-body">
-                    <h5 class="card-title">Titre de l'article</h5>
-                    <p class="card-text">Voici un exemple de contenu d'article. Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
-                    <a href="{{path('app_article_show')}}" class="btn btn-primary">Lire la suite</a>
-                </div>
-            </div>
-        </article>
-    </div>
-</div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Content</th>
+                <th>CreatedAt</th>
+                <th>UpdatedAt</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for article in articles %}
+            <tr>
+                <td>{{ article.id }}</td>
+                <td>{{ article.title }}</td>
+                <td>{{ article.content }}</td>
+                <td>{{ article.createdAt ? article.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ article.updatedAt ? article.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_article_show', {'id': article.id}) }}">show</a>
+                    <a href="{{ path('app_article_edit', {'id': article.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_article_new') }}">Create new</a>
 {% endblock %}
