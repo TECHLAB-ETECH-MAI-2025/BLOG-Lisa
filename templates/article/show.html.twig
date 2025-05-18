@@ -1,38 +1,37 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Article{% endblock %}
+{% block title %}Détail de l'Article{% endblock %}
 
 {% block body %}
-    <h1>Article</h1>
-
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ article.id }}</td>
-            </tr>
-            <tr>
-                <th>Title</th>
-                <td>{{ article.title }}</td>
-            </tr>
-            <tr>
-                <th>Content</th>
-                <td>{{ article.content }}</td>
-            </tr>
-            <tr>
-                <th>CreatedAt</th>
-                <td>{{ article.createdAt ? article.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>UpdatedAt</th>
-                <td>{{ article.updatedAt ? article.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_article_index') }}">back to list</a>
-
-    <a href="{{ path('app_article_edit', {'id': article.id}) }}">edit</a>
-
-    {{ include('article/_delete_form.html.twig') }}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ article.title }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% if article.image %}
+                    <div class="col-md-4">
+                        <img src="{{ asset('uploads/images/' ~ article.image) }}" alt="{{ article.title }}" class="img-fluid rounded">
+                    </div>
+                {% else %}
+                    <div class="col-md-4">
+                        <img src="{{ asset('images/default.png') }}" alt="Image par défaut" class="img-fluid rounded">
+                    </div>
+                {% endif %}
+                <div class="col-md-8">
+                    <p><strong>Catégorie :</strong> {{ article.category.name }}</p>
+                    <p><strong>Contenu :</strong> {{ article.content }}</p>
+                    <p><strong>Date de création :</strong> {{ article.createdAt ? article.createdAt|date('d/m/Y H:i') : 'Non définie' }}</p>
+                    <p><strong>Dernière mise à jour :</strong> {{ article.updatedAt ? article.updatedAt|date('d/m/Y H:i') : 'Non modifié' }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer text-end">
+            <a href="{{ path('app_article_index') }}" class="btn btn-secondary">Retour à la liste</a>
+            <a href="{{ path('app_article_edit', {'id': article.id}) }}" class="btn btn-primary">Modifier</a>
+            {{ include('article/_delete_form.html.twig') }}
+        </div>
+    </div>
+</div>
 {% endblock %}

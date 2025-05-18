@@ -1,17 +1,24 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Category index{% endblock %}
+{% block title %}Liste des Catégories{% endblock %}
 
 {% block body %}
-    <h1>Category index</h1>
+<div class="container mt-5">
+    <h1 class="mb-4">Liste des Catégories</h1>
 
-    <table class="table">
-        <thead>
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ path('app_category_new') }}" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Créer une nouvelle catégorie
+        </a>
+    </div>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
             <tr>
                 <th>Id</th>
-                <th>Name</th>
+                <th>Nom</th>
                 <th>Description</th>
-                <th>actions</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -19,19 +26,24 @@
             <tr>
                 <td>{{ category.id }}</td>
                 <td>{{ category.name }}</td>
-                <td>{{ category.description }}</td>
+                <td>{{ category.description | slice(0, 50) ~ '...' }}</td>
                 <td>
-                    <a href="{{ path('app_category_show', {'id': category.id}) }}">show</a>
-                    <a href="{{ path('app_category_edit', {'id': category.id}) }}">edit</a>
+                    <div class="btn-group" role="group">
+                        <a href="{{ path('app_category_show', {'id': category.id}) }}" class="btn btn-primary btn-sm me-2">
+                            <i class="bi bi-eye"></i> Voir
+                        </a>
+                        <a href="{{ path('app_category_edit', {'id': category.id}) }}" class="btn btn-warning btn-sm">
+                            <i class="bi bi-pencil"></i> Modifier
+                        </a>
+                    </div>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">no records found</td>
+                <td colspan="4" class="text-center">Aucune catégorie trouvée.</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-
-    <a href="{{ path('app_category_new') }}">Create new</a>
+</div>
 {% endblock %}

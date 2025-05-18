@@ -1,18 +1,25 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Comment index{% endblock %}
+{% block title %}Liste des Commentaires{% endblock %}
 
 {% block body %}
-    <h1>Comment index</h1>
+<div class="container mt-5">
+    <h1 class="mb-4">Liste des Commentaires</h1>
 
-    <table class="table">
-        <thead>
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ path('app_comment_contoller_new') }}" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Créer un nouveau commentaire
+        </a>
+    </div>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
             <tr>
                 <th>Id</th>
-                <th>Author</th>
-                <th>Content</th>
-                <th>CreatedAt</th>
-                <th>actions</th>
+                <th>Auteur</th>
+                <th>Contenu</th>
+                <th>Créé le</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -20,20 +27,25 @@
             <tr>
                 <td>{{ comment.id }}</td>
                 <td>{{ comment.author }}</td>
-                <td>{{ comment.content }}</td>
-                <td>{{ comment.createdAt ? comment.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ comment.content | slice(0, 50) ~ '...' }}</td>
+                <td>{{ comment.createdAt ? comment.createdAt|date('d/m/Y H:i') : '' }}</td>
                 <td>
-                    <a href="{{ path('app_comment_contoller_show', {'id': comment.id}) }}">show</a>
-                    <a href="{{ path('app_comment_contoller_edit', {'id': comment.id}) }}">edit</a>
+                    <div class="btn-group" role="group">
+                        <a href="{{ path('app_comment_contoller_show', {'id': comment.id}) }}" class="btn btn-primary btn-sm me-2">
+                            <i class="bi bi-eye"></i> Voir
+                        </a>
+                        <a href="{{ path('app_comment_contoller_edit', {'id': comment.id}) }}" class="btn btn-warning btn-sm">
+                            <i class="bi bi-pencil"></i> Modifier
+                        </a>
+                    </div>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="5">no records found</td>
+                <td colspan="5" class="text-center">Aucun commentaire trouvé.</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
-
-    <a href="{{ path('app_comment_contoller_new') }}">Create new</a>
+</div>
 {% endblock %}

@@ -23,24 +23,25 @@ final class CategoryController extends AbstractController
     }
 
     #[Route('/new', name: 'app_category_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $category = new Category();
-        $form = $this->createForm(CategoryForm::class, $category);
-        $form->handleRequest($request);
+public function new(Request $request, EntityManagerInterface $entityManager): Response
+{
+    $category = new Category();
+    $form = $this->createForm(CategoryForm::class, $category);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($category);
-            $entityManager->flush();
+    if ($form->isSubmitted() && $form->isValid()) {
+        $entityManager->persist($category);
+        $entityManager->flush();
 
-            return $this->redirectToRoute('app_category_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('category/new.html.twig', [
-            'category' => $category,
-            'form' => $form,
-        ]);
+        $this->addFlash('success', 'Catégorie créée avec succès.');
+        return $this->redirectToRoute('app_category_index');
     }
+
+    return $this->render('category/new.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
+
 
     #[Route('/{id}', name: 'app_category_show', methods: ['GET'])]
     public function show(Category $category): Response
