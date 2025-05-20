@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/comment/contoller')]
+#[Route('/comment')]
 final class CommentContollerController extends AbstractController
 {
     #[Route(name: 'app_comment_contoller_index', methods: ['GET'])]

@@ -1,42 +1,53 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails de la Catégorie{% endblock %}
+{% block title %}Détail de la Catégorie{% endblock %}
 
 {% block body %}
 <div class="container mt-5">
-    <h1 class="mb-4 text-center">Détails de la Catégorie</h1>
+    <div class="card">
+        <div class="card-header">
 
-    <div class="card shadow-sm">
+            <h2> Name : {{ category.name }}</h2>
+        </div>
         <div class="card-body">
-            <table class="table table-bordered">
-                <tbody>
-                    <tr>
-                        <th scope="row" class="table-primary">Id</th>
-                        <td>{{ category.id }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row" class="table-primary">Nom</th>
-                        <td>{{ category.name }}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row" class="table-primary">Description</th>
-                        <td>{{ category.description }}</td>
-                    </tr>
-                </tbody>
-            </table>
+            <p><strong>ID :</strong> {{ category.id }}</p>
+            <p><strong>Description :</strong> {{ category.description }}</p>
 
-            <div class="d-flex justify-content-between mt-4">
-                <a href="{{ path('app_category_index') }}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Retour à la liste
-                </a>
-                <div class="d-flex gap-2">
-                    <a href="{{ path('app_category_edit', {'id': category.id}) }}" class="btn btn-warning">
-                        <i class="bi bi-pencil"></i> Modifier
-                    </a>
-                    {{ include('category/_delete_form.html.twig') }}
-                </div>
+            <hr>
+
+            <h4>Articles liés :</h4>
+            {% if category.articles is not empty %}
+            <ul class="list-group">
+                {% for article in category.articles %}
+                <li class="list-group-item bg-light d-flex text-dark justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ article.title }}</strong><br>
+                        <small>{{ article.createdAt ? article.createdAt|date('d/m/Y H:i') : 'Date inconnue' }}</small>
+                    </div>
+                    <div>
+                        <a href="{{ path('app_article_show', {'id': article.id}) }}"
+                            class="btn btn-sm btn-primary">Voir</a>
+                        <a href="{{ path('app_article_edit', {'id': article.id}) }}"
+                            class="btn btn-sm btn-warning">Modifier</a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+
+            {% else %}
+            <div class="alert alert-info mt-3">
+                Aucun article lié à cette catégorie.
+            </div>
+            {% endif %}
+        </div>
+        <div class="card-footer mb-4">
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{{ path('app_category_index') }}" class="btn btn-secondary">Retour à la liste</a>
+                <a href="{{ path('app_category_edit', {'id': category.id}) }}" class="btn btn-primary">Modifier</a>
+                {{ include('category/_delete_form.html.twig') }}
             </div>
         </div>
+
     </div>
 </div>
 {% endblock %}

@@ -11,27 +11,72 @@
         <div class="card-body">
             <div class="row">
                 {% if article.image %}
-                    <div class="col-md-4">
-                        <img src="{{ asset('uploads/images/' ~ article.image) }}" alt="{{ article.title }}" class="img-fluid rounded">
-                    </div>
+                <div class="col-md-4">
+                    <img src="{{ asset('uploads/images/' ~ article.image) }}" alt="{{ article.title }}"
+                        class="img-fluid rounded">
+                </div>
                 {% else %}
-                    <div class="col-md-4">
-                        <img src="{{ asset('images/default.png') }}" alt="Image par défaut" class="img-fluid rounded">
-                    </div>
+                <div class="col-md-4">
+                    <img src="{{ asset('images/default.png') }}" alt="Image par défaut" class="img-fluid rounded">
+                </div>
                 {% endif %}
                 <div class="col-md-8">
                     <p><strong>Catégorie :</strong> {{ article.category.name }}</p>
                     <p><strong>Contenu :</strong> {{ article.content }}</p>
-                    <p><strong>Date de création :</strong> {{ article.createdAt ? article.createdAt|date('d/m/Y H:i') : 'Non définie' }}</p>
-                    <p><strong>Dernière mise à jour :</strong> {{ article.updatedAt ? article.updatedAt|date('d/m/Y H:i') : 'Non modifié' }}</p>
+                    <p><strong>Date de création :</strong> {{ article.createdAt ? article.createdAt|date('d/m/Y H:i') :
+                        'Non définie' }}</p>
+                    <p><strong>Dernière mise à jour :</strong> {{ article.updatedAt ? article.updatedAt|date('d/m/Y
+                        H:i') : 'Non modifié' }}</p>
                 </div>
             </div>
         </div>
-        <div class="card-footer text-end">
-            <a href="{{ path('app_article_index') }}" class="btn btn-secondary">Retour à la liste</a>
-            <a href="{{ path('app_article_edit', {'id': article.id}) }}" class="btn btn-primary">Modifier</a>
-            {{ include('article/_delete_form.html.twig') }}
+        <div class="card-footer mb-4">
+            <div class="d-flex justify-content-end gap-2">
+                <a href="{{ path('app_article_index') }}" class="btn btn-secondary">Retour à la liste</a>
+                <a href="{{ path('app_article_edit', {'id': article.id}) }}" class="btn btn-primary">Modifier</a>
+                {{ include('article/_delete_form.html.twig') }}
+            </div>
+
         </div>
+        <div class="container mt-4">
+            <h3 class="mb-4">Commentaires</h3>
+
+            {% for comment in article.comments %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title"> Auteur : {{ comment.author }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted"> Publié le : {{ comment.createdAt|date('d/m/Y H:i') }}</h6>
+                    <p class="card-text">{{ comment.content }}</p>
+                </div>
+            </div>
+            {% else %}
+            <p>Aucun commentaire pour le moment.</p>
+            {% endfor %}
+
+            <div class="card mt-5 mx-auto" style="max-width: 600px;">
+                <div class="card-header text-center">
+                    <h4>Laisser un commentaire</h4>
+                </div>
+                <div class="card-body">
+                    {{ form_start(commentForm) }}
+                    <div class="mb-3">
+                         {{ form_label(commentForm.author) }}
+                        {{ form_widget(commentForm.author, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form_label(commentForm.content) }}
+                        {{ form_widget(commentForm.content, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+                    </div>
+                    <div class="text-center">
+                        <button class="btn btn-success">Commenter</button>
+                    </div>
+                    {{ form_end(commentForm) }}
+                </div>
+            </div>
+        </div>
+
     </div>
+
+
 </div>
 {% endblock %}

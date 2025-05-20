@@ -10,7 +10,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-
+use App\Entity\Comment;
+use App\Form\CommentForm;
 
 #[Route('/article')]
 final class ArticleController extends AbstractController
@@ -28,7 +29,6 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
 {
     $article = new Article();
     
-    // ✅ Initialisation de createdAt et updatedAt
     $article->setCreatedAt(new \DateTimeImmutable());
     $article->setUpdatedAt(null);
 
@@ -49,14 +49,28 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
 }
 
 
-    #[Route('/{id}', name: 'app_article_show', methods: ['GET'])]
-    public function show(Article $article): Response
-    {
-        return $this->render('article/show.html.twig', [
-            'article' => $article,
-        ]);
+    #[Route('/{id}', name: 'app_article_show', methods: ['GET', 'POST'])]
+public function show(Request $request, Article $article, EntityManagerInterface $em): Response
+{
+    $comment = new Comment();
+    $comment->setArticle($article);
+    $comment->setCreatedAt(new \DateTimeImmutable());
+
+    $form = $this->createForm(CommentForm::class, $comment);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $em->persist($comment);
+        $em->flush();
+
+        return $this->redirectToRoute('app_article_show', ['id' => $article->getId()]);
     }
 
+    return $this->render('article/show.html.twig', [
+        'article' => $article,
+        'commentForm' => $form->createView(),
+    ]);
+}
     #[Route('/{id}/edit', name: 'app_article_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Article $article, EntityManagerInterface $entityManager): Response
     {
@@ -75,14 +89,15 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
         ]);
     }
 
-    #[Route('/{id}', name: 'app_article_delete', methods: ['POST'])]
-    public function delete(Request $request, Article $article, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$article->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($article);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('app_article_index', [], Response::HTTP_SEE_OTHER);
+    #[Route('/article/{id}', name: 'app_article_delete', methods: ['POST'])]
+public function delete(Request $request, Article $article, EntityManagerInterface $em): Response
+{
+    if ($this->isCsrfTokenValid('delete' . $article->getId(), $request->request->get('_token'))) {
+        $em->remove($article);
+        $em->flush();
     }
+
+    return $this->redirectToRoute('app_article_index');
+}
+
 }
