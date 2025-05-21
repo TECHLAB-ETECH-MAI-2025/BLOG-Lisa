@@ -30,9 +30,10 @@ class Article
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'articles')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(inversedBy: 'articles')]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Category $category = null;
+
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;

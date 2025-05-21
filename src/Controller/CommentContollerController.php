@@ -6,19 +6,31 @@ use App\Entity\Comment;
 use App\Form\CommentForm;
 use App\Repository\CommentRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/comment')]
 final class CommentContollerController extends AbstractController
 {
     #[Route(name: 'app_comment_contoller_index', methods: ['GET'])]
-    public function index(CommentRepository $commentRepository): Response
-    {
+    public function index(
+        Request $request,
+        CommentRepository $commentRepository,
+        PaginatorInterface $paginator
+    ): Response {
+        $queryBuilder = $commentRepository->createQueryBuilder('c');
+
+        $pagination = $paginator->paginate(
+            $queryBuilder,
+            $request->query->getInt('page', 1),
+            10
+        );
+
         return $this->render('comment_contoller/index.html.twig', [
-            'comments' => $commentRepository->findAll(),
+            'pagination' => $pagination,
         ]);
     }
 
@@ -71,7 +83,7 @@ final class CommentContollerController extends AbstractController
     #[Route('/{id}', name: 'app_comment_contoller_delete', methods: ['POST'])]
     public function delete(Request $request, Comment $comment, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$comment->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$comment->getId(), $request->request->get('_token'))) {
             $entityManager->remove($comment);
             $entityManager->flush();
         }

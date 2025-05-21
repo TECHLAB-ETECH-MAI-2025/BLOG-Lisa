@@ -15,16 +15,14 @@
     <table class="table table-striped table-hover">
         <thead class="table-dark">
             <tr>
-                <th>Id</th>
                 <th>Nom</th>
                 <th>Description</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-        {% for category in categories %}
+        {% for category in pagination %}
             <tr>
-                <td>{{ category.id }}</td>
                 <td>{{ category.name }}</td>
                 <td>{{ category.description | slice(0, 50) ~ '...' }}</td>
                 <td>
@@ -45,5 +43,9 @@
         {% endfor %}
         </tbody>
     </table>
+
+    <div class="navigation d-flex justify-content-center mt-4">
+        {{ knp_pagination_render(pagination) }}
+    </div>
 </div>
 {% endblock %}

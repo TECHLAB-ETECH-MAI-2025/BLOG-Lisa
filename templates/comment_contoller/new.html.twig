@@ -1,11 +1,21 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Comment{% endblock %}
+{% block title %}Nouvelle Catégorie{% endblock %}
 
 {% block body %}
-    <h1>Create new Comment</h1>
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Créer une nouvelle commentaire</h1>
 
-    {{ include('comment_contoller/_form.html.twig') }}
+    <div class="card shadow-sm">
+        <div class="card-body">
+            {{ include('comment_contoller/_form.html.twig', { 'button_label': 'Créer' }) }}
+        </div>
+    </div>
 
-    <a href="{{ path('app_comment_contoller_index') }}">back to list</a>
+    <div class="d-flex justify-content-end mt-3">
+        <a href="{{ path('app_comment_contoller_index') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour à la liste
+        </a>
+    </div>
+</div>
 {% endblock %}

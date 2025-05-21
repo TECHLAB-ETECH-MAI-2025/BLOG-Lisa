@@ -9,14 +9,29 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
 
+
+
 class AppFixtures extends Fixture
 {
+    
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create();
 
+        $uploadDir = __DIR__ . '/../../public/uploads/images';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+
+    $imageFiles = [];
+    for ($i = 1; $i <= 18; $i++) {
+        $imageFiles[] = $i . '.png';
+    }
+
         $categories = [];
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             $category = new Category();
             $category->setName($faker->word());
             $category->setDescription($faker->text(100));
@@ -34,7 +49,7 @@ class AppFixtures extends Fixture
 
             $article->setCategory($categories[array_rand($categories)]);
 
-            $article->setImage($faker->imageUrl(640, 480, 'cats', true));
+            $article->setImage($imageFiles[array_rand($imageFiles)]);
 
             $manager->persist($article);
 

@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Category;
+use App\Entity\Article;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -14,12 +15,8 @@ class CategoryForm extends AbstractType
     {
         $builder
             ->add('name')
-            ->add('description')
-            ->add('article', EntityType::class, [
-                'class' => Category::class,
-                'choice_label' => 'id',
-            ])
-        ;
+            ->add('description');
+        
     }
 
     public function configureOptions(OptionsResolver $resolver): void
