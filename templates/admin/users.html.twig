@@ -1,0 +1,139 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- Sidebar menu -->
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <h5 class="sidebar-heading px-3 mb-3 text-muted">Menu d'administration</h5>
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ path('app_admin') }}">
+              <i class="bi bi-speedometer2"></i> Tableau de bord
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{{ path('app_admin_users') }}">
+              <i class="bi bi-people"></i> Gestion des utilisateurs
+            </a>
+          </li>
+          <li class="nav-item mt-3">
+            <a class="btn btn-outline-secondary" href="{{ path('app_home') }}">
+              <i class="bi bi-arrow-left"></i> Retour au site
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+      <h1 class="h2 mb-4">Gestion des utilisateurs</h1>
+
+      {# Flash messages #}
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      <div class="mb-3">
+        <a href="{{ path('app_admin_users_new') }}" class="btn btn-primary">
+          <i class="bi bi-plus-circle"></i> Nouvel utilisateur
+        </a>
+      </div>
+
+      {% if users|length > 0 %}
+      <div class="table-responsive">
+        <table class="table table-striped align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Nom</th>
+              <th>Email</th>
+              <th>Rôles</th>
+              <th>Vérifié</th>
+              <th>Date d'inscription</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td>{{ user.id }}</td>
+              <td>{{ user.fullName }}</td>
+              <td>{{ user.email }}</td>
+              <td>
+                {% for role in user.roles %}
+                  {% if role == 'ROLE_ADMIN' %}
+                    <span class="badge bg-warning text-dark">Admin</span>
+                  {% elseif role == 'ROLE_SUPER_ADMIN' %}
+                    <span class="badge bg-danger">Super Admin</span>
+                  {% elseif role == 'ROLE_USER' %}
+                    <span class="badge bg-secondary">Utilisateur</span>
+                  {% else %}
+                    <span class="badge bg-info">{{ role }}</span>
+                  {% endif %}
+                {% endfor %}
+              </td>
+              <td>
+                {% if user.isVerified %}
+                  <span class="badge bg-success">Oui</span>
+                {% else %}
+                  <span class="badge bg-secondary">Non</span>
+                {% endif %}
+              </td>
+              <td>{{ user.createdAt|date('d/m/Y') }}</td>
+              <td>
+                <a href="{{ path('app_admin_users_edit', {'id': user.id}) }}" class="btn btn-sm btn-outline-primary" title="Modifier">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <!-- Button trigger modal suppression -->
+                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ user.id }}" title="Supprimer">
+                  <i class="bi bi-trash"></i>
+                </button>
+
+                <!-- Modal confirmation suppression -->
+                <div class="modal fade" id="deleteUserModal{{ user.id }}" tabindex="-1" aria-labelledby="deleteUserModalLabel{{ user.id }}" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="deleteUserModalLabel{{ user.id }}">Confirmation de suppression</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                      </div>
+                      <div class="modal-body">
+                        Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{{ user.fullName }}</strong> ({{ user.email }}) ?
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <form method="post" action="{{ path('app_admin_users_delete', {'id': user.id}) }}" onsubmit="return confirm('Confirmer la suppression ?');">
+                          <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                          <button type="submit" class="btn btn-danger">Supprimer</button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+        <div class="alert alert-info" role="alert">
+          Aucun utilisateur trouvé.
+        </div>
+      {% endif %}
+    </main>
+
+  </div>
+</div>
+{% endblock %}
