@@ -15,25 +15,26 @@ use Symfony\Component\Routing\Annotation\Route;
 final class AdminController extends AbstractController
 {
     #[Route('/admin', name: 'app_admin')]
-public function index(UserRepository $userRepository): Response
-{
-    $userCount = $userRepository->count([]);
+    public function index(UserRepository $userRepository): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-    $verifiedCount = $userRepository->count(['isVerified' => true]);
+        $userCount = $userRepository->count([]);
+        $verifiedCount = $userRepository->count(['isVerified' => true]);
+        $adminCount = $userRepository->countAdmins();
 
-    $adminCount = $userRepository->countAdmins();
-
-    return $this->render('admin/index.html.twig', [
-        'userCount' => $userCount,
-        'verifiedCount' => $verifiedCount,
-        'adminCount' => $adminCount,
-    ]);
-}
-
+        return $this->render('admin/index.html.twig', [
+            'userCount' => $userCount,
+            'verifiedCount' => $verifiedCount,
+            'adminCount' => $adminCount,
+        ]);
+    }
 
     #[Route('/admin/users', name: 'app_admin_users')]
     public function users(UserRepository $userRepository): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $users = $userRepository->findAll();
 
         return $this->render('admin/users.html.twig', [
@@ -44,6 +45,8 @@ public function index(UserRepository $userRepository): Response
     #[Route('/admin/users/new', name: 'app_admin_users_new')]
     public function newUser(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $user = new User();
         $form = $this->createForm(AdminUserFormType::class, $user);
         $form->handleRequest($request);
@@ -62,8 +65,6 @@ public function index(UserRepository $userRepository): Response
             $entityManager->persist($user);
             $entityManager->flush();
 
-            $this->addFlash('success', 'L\'utilisateur a été créé avec succès.');
-
             return $this->redirectToRoute('app_admin_users');
         }
 
@@ -76,6 +77,8 @@ public function index(UserRepository $userRepository): Response
     #[Route('/admin/users/{id}/edit', name: 'app_admin_users_edit')]
     public function editUser(User $user, Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         $form = $this->createForm(AdminUserFormType::class, $user);
         $form->handleRequest($request);
 
@@ -91,8 +94,6 @@ public function index(UserRepository $userRepository): Response
 
             $entityManager->flush();
 
-            $this->addFlash('success', 'L\'utilisateur a été modifié avec succès.');
-
             return $this->redirectToRoute('app_admin_users');
         }
 
@@ -105,16 +106,15 @@ public function index(UserRepository $userRepository): Response
     #[Route('/admin/users/{id}/delete', name: 'app_admin_users_delete', methods: ['POST'])]
     public function deleteUser(User $user, Request $request, EntityManagerInterface $entityManager): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
         if ($this->isCsrfTokenValid('delete' . $user->getId(), $request->request->get('_token'))) {
             if ($user === $this->getUser()) {
-                $this->addFlash('error', 'Vous ne pouvez pas supprimer votre propre compte.');
                 return $this->redirectToRoute('app_admin_users');
             }
 
             $entityManager->remove($user);
             $entityManager->flush();
-
-            $this->addFlash('success', 'L\'utilisateur a été supprimé avec succès.');
         }
 
         return $this->redirectToRoute('app_admin_users');
