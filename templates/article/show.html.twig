@@ -21,7 +21,7 @@
                 </div>
                 {% endif %}
                 <div class="col-md-8">
-                    <p><strong>Catégorie :</strong> {{ article.category.name }}</p>
+                    <p><strong>Catégorie :</strong> {{ article.category ? article.category.name : '' }}</p>
                     <p><strong>Contenu :</strong> {{ article.content }}</p>
                     <p><strong>Date de création :</strong> {{ article.createdAt ? article.createdAt|date('d/m/Y H:i') :
                         'Non définie' }}</p>
