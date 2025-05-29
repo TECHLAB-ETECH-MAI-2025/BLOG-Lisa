@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Form\ChangePasswordFormType;
+use App\Form\ChangePasswordForm;
 use App\Form\ProfileFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -50,7 +50,7 @@ final class ProfileController extends AbstractController
         EntityManagerInterface $entityManager
     ): Response {
         $user = $this->getUser();
-        $form = $this->createForm(ChangePasswordFormType::class);
+        $form = $this->createForm(ChangePasswordForm::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
