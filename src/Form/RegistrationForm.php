@@ -15,6 +15,8 @@ use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+
 
 class RegistrationForm extends AbstractType
 {
@@ -60,6 +62,23 @@ class RegistrationForm extends AbstractType
                         'message' => 'Vous devez accepter nos conditions d\'utilisation.',
                     ]),
                 ],
+                'attr' => [
+                    'class' => 'form-check-input',
+                ],                   
+                'label_attr' => [
+                    'class' => 'form-check-label',
+                ],
+            ])      
+            ->add('role', ChoiceType::class, [
+                'label' => 'Rôle',
+                'mapped' => false,
+                'choices' => [
+                    'Utilisateur' => 'ROLE_USER',
+                    'Administrateur' => 'ROLE_ADMIN',
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'required' => true,
                 'attr' => [
                     'class' => 'form-check-input',
                 ],
