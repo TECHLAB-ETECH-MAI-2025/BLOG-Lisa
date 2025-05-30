@@ -1,19 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Page d'Accueil{% endblock %}
+{% block title %}Bienvenue{% endblock %}
 
 {% block body %}
 <div class="container mt-5 text-center">
-    <h1 class="mb-4">Bienvenue sur notre plateforme 🎉</h1>
-    <p class="lead mb-5">Veuillez choisir votre rôle pour continuer :</p>
-
-    <div class="d-flex justify-content-center gap-4">
-        <a href="{{ path('app_login', {'role': 'admin'}) }}" class="btn btn-danger btn-lg px-5">
-            Espace Admin
-        </a>
-        <a href="{{ path('app_login', {'role': 'client'}) }}" class="btn btn-primary btn-lg px-5">
-            Espace Client
-        </a>
-    </div>
+    <h1 class="mb-4 text-primary">Bienvenue sur notre plateforme !</h1>
+    <p class="lead">
+        Nous sommes ravis de vous accueillir. Cette plateforme vous permet de créer un compte, 
+        vous connecter et accéder à nos services de manière simple, rapide et sécurisée.
+    </p>
+    
 </div>
 {% endblock %}

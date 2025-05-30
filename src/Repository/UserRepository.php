@@ -28,13 +28,19 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     public function countAdmins(): int
-    {
-        return $this->createQueryBuilder('u')
-            ->select('COUNT(u.id)')
-            ->where('u.roles LIKE :role_admin OR u.roles LIKE :role_super_admin')
-            ->setParameter('role_admin', '%"ROLE_ADMIN"%')
-            ->setParameter('role_super_admin', '%"ROLE_SUPER_ADMIN"%')
-            ->getQuery()
-            ->getSingleScalarResult();
-    }
+{
+    $conn = $this->getEntityManager()->getConnection();
+
+    $sql = <<<SQL
+        SELECT COUNT(*) FROM "user"
+        WHERE roles::jsonb @> :role_admin
+           OR roles::jsonb @> :role_super_admin
+    SQL;
+
+    return (int) $conn->fetchOne($sql, [
+        'role_admin' => json_encode(['ROLE_ADMIN']),
+        'role_super_admin' => json_encode(['ROLE_SUPER_ADMIN']),
+    ]);
+}
+
 }
