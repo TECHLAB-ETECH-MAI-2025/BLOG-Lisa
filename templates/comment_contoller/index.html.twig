@@ -34,8 +34,11 @@
                         <a href="{{ path('app_comment_contoller_show', {'id': comment.id}) }}" class="btn btn-primary btn-sm me-2">
                             <i class="bi bi-eye"></i> Voir
                         </a>
-                        <a href="{{ path('app_comment_contoller_edit', {'id': comment.id}) }}" class="btn btn-warning btn-sm">
+                        <a href="{{ path('app_comment_contoller_edit', {'id': comment.id}) }}" class="btn btn-warning btn-sm me-2">
                             <i class="bi bi-pencil"></i> Modifier
+                        </a>
+                        <a href="{{ path('app_comment_contoller_delete', {'id': comment.id}) }}" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash"></i> Supprimer
                         </a>
                     </div>
                 </td>
