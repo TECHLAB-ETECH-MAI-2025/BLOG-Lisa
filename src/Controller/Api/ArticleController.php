@@ -18,56 +18,51 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/api')]
 class ArticleController extends AbstractController
 {
-    #[Route('/articles', name: 'api_articles_list', methods: ['POST'])]
-    public function list(Request $request, ArticleRepository $articleRepository): JsonResponse
-    {
-        $draw = $request->request->getInt('draw');
-        $start = $request->request->getInt('start');
-        $length = $request->request->getInt('length');
-        $search = $request->request->all('search')['value'] ?? null;
-        $orders = $request->request->all('order') ?? [];
+    #[Route('/articles', name: 'api_articles_list', methods: ['GET'])]
+public function list(Request $request, ArticleRepository $articleRepository): JsonResponse
+{
+    $draw = $request->query->getInt('draw', 1);
+    $start = $request->query->getInt('start', 0);
+    $length = $request->query->getInt('length', 10);
+    $search = $request->query->all('search')['value'] ?? null;
+    $order = $request->query->all('order')[0] ?? ['column' => 0, 'dir' => 'desc'];
 
-        $columns = [
-            0 => 'a.id',
-            1 => 'a.title',
-            2 => 'categories',
-            3 => 'commentsCount',
-            4 => 'likesCount',
-            5 => 'a.createdAt',
+    $columnMapping = [
+        0 => 'a.id',
+        1 => 'a.title',
+        2 => 'c.title',
+        5 => 'a.createdAt'
+    ];
+
+    $orderColumn = $columnMapping[$order['column']] ?? 'a.id';
+    $orderDir = $order['dir'] ?? 'desc';
+
+    $results = $articleRepository->findForDataTable($start, $length, $search, $orderColumn, $orderDir);
+
+    $data = [];
+    foreach ($results['data'] as $article) {
+        $categoryNames = $article->getCategories()->map(fn($category) => $category->getName())->toArray();
+
+        $data[] = [
+            'id' => $article->getId(),
+            'title' => htmlspecialchars($article->getTitle(), ENT_QUOTES),
+            'categories' => $categoryNames ? implode(', ', $categoryNames) : 'Aucune catégorie',
+            'commentsCount' => $article->getComments()->count(),
+            'likesCount' => $article->getLikes()->count(),
+            'createdAt' => $article->getCreatedAt()->format('d/m/Y H:i'),
+            'actions' => $this->renderView('article/_actions.html.twig', [
+                'article' => $article
+            ])
         ];
-
-        $orderColumn = $columns[$orders[0]['column'] ?? 0] ?? 'a.id';
-        $orderDir = $orders[0]['dir'] ?? 'desc';
-
-        $results = $articleRepository->findForDataTable($start, $length, $search, $orderColumn, $orderDir);
-
-        $data = [];
-        foreach ($results['data'] as $article) {
-            $categoryNames = array_map(fn($category) => $category->getTitle(), $article->getCategories()->toArray());
-
-            $data[] = [
-                'id' => $article->getId(),
-                'title' => sprintf('<a href="%s">%s</a>',
-                    $this->generateUrl('app_article_show', ['id' => $article->getId()]),
-                    htmlspecialchars($article->getTitle())
-                ),
-                'categories' => implode(', ', $categoryNames),
-                'commentsCount' => $article->getComments()->count(),
-                'likesCount' => $article->getLikes()->count(),
-                'createdAt' => $article->getCreatedAt()->format('d/m/Y H:i'),
-                'actions' => $this->renderView('article/_actions.html.twig', [
-                    'article' => $article
-                ])
-            ];
-        }
-
-        return new JsonResponse([
-            'draw' => $draw,
-            'recordsTotal' => $results['totalCount'],
-            'recordsFiltered' => $results['filteredCount'],
-            'data' => $data
-        ]);
     }
+
+    return $this->json([
+        'draw' => $draw,
+        'recordsTotal' => $results['totalCount'],
+        'recordsFiltered' => $results['filteredCount'],
+        'data' => $data
+    ]);
+}
 
     #[Route('/articles/search', name: 'api_articles_search', methods: ['GET'])]
     public function search(Request $request, ArticleRepository $articleRepository): JsonResponse

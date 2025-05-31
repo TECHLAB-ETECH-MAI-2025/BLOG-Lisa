@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/comment')]
 final class CommentContollerController extends AbstractController
 {
-    #[Route(name: 'app_comment_contoller_index', methods: ['GET'])]
+    #[Route(name: 'app_comment_index', methods: ['GET'])]
     public function index(
         Request $request,
         CommentRepository $commentRepository,
@@ -34,7 +34,7 @@ final class CommentContollerController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_comment_contoller_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'app_comment_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $comment = new Comment();
@@ -45,7 +45,7 @@ final class CommentContollerController extends AbstractController
             $entityManager->persist($comment);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_comment_contoller_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_comment_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('comment_contoller/new.html.twig', [
@@ -54,7 +54,7 @@ final class CommentContollerController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_comment_contoller_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_comment_show', methods: ['GET'])]
     public function show(Comment $comment): Response
     {
         return $this->render('comment_contoller/show.html.twig', [
@@ -62,7 +62,7 @@ final class CommentContollerController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_comment_contoller_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_comment_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Comment $comment, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(CommentForm::class, $comment);
@@ -71,7 +71,7 @@ final class CommentContollerController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_comment_contoller_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_comment_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('comment_contoller/edit.html.twig', [
@@ -80,7 +80,7 @@ final class CommentContollerController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_comment_contoller_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_comment_delete', methods: ['POST'])]
     public function delete(Request $request, Comment $comment, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$comment->getId(), $request->request->get('_token'))) {
@@ -88,6 +88,6 @@ final class CommentContollerController extends AbstractController
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_comment_contoller_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_comment_index', [], Response::HTTP_SEE_OTHER);
     }
 }

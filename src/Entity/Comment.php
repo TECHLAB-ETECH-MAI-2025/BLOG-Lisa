@@ -22,8 +22,8 @@ class Comment
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\ManyToOne(inversedBy: 'comments')]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[ORM\ManyToOne(targetEntity: Article::class, inversedBy: 'comments')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Article $article = null;
 
     public function getId(): ?int

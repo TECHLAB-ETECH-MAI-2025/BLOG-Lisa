@@ -1,0 +1,16 @@
+{# templates/article/_actions.html.twig #}
+<div class="btn-group " role="group">
+    <a href="{{ path('app_article_show', {id: article.id}) }}" class="btn btn-sm btn-primary me-2">
+        Voir
+    </a>
+    <a href="{{ path('app_article_edit', {id: article.id}) }}" class="btn btn-sm btn-warning me-2">
+        Modifier
+    </a>
+    <button type="button" 
+            class="btn btn-sm btn-danger me-2" 
+            data-action="modal#openDeleteModal"
+            data-article-id="{{ article.id }}"
+            data-article-title="{{ article.title|escape('html_attr') }}">
+        Supprimer
+    </button>
+</div>
