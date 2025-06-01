@@ -6,6 +6,7 @@
     <a href="{{ path('app_article_edit', {id: article.id}) }}" class="btn btn-sm btn-warning me-2">
         Modifier
     </a>
+    <input type="hidden" name="_token" value="{{ csrf_token('like' ~ article.id) }}">
     <button type="button" 
             class="btn btn-sm btn-danger me-2" 
             data-action="modal#openDeleteModal"

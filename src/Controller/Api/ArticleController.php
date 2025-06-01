@@ -14,55 +14,57 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 #[Route('/api')]
 class ArticleController extends AbstractController
 {
     #[Route('/articles', name: 'api_articles_list', methods: ['GET'])]
-public function list(Request $request, ArticleRepository $articleRepository): JsonResponse
-{
-    $draw = $request->query->getInt('draw', 1);
-    $start = $request->query->getInt('start', 0);
-    $length = $request->query->getInt('length', 10);
-    $search = $request->query->all('search')['value'] ?? null;
-    $order = $request->query->all('order')[0] ?? ['column' => 0, 'dir' => 'desc'];
+    public function list(Request $request, ArticleRepository $articleRepository): JsonResponse
+    {
+        $draw = $request->query->getInt('draw', 1);
+        $start = $request->query->getInt('start', 0);
+        $length = $request->query->getInt('length', 10);
+        $search = $request->query->all('search')['value'] ?? null;
+        $order = $request->query->all('order')[0] ?? ['column' => 0, 'dir' => 'desc'];
 
-    $columnMapping = [
-        0 => 'a.id',
-        1 => 'a.title',
-        2 => 'c.title',
-        5 => 'a.createdAt'
-    ];
-
-    $orderColumn = $columnMapping[$order['column']] ?? 'a.id';
-    $orderDir = $order['dir'] ?? 'desc';
-
-    $results = $articleRepository->findForDataTable($start, $length, $search, $orderColumn, $orderDir);
-
-    $data = [];
-    foreach ($results['data'] as $article) {
-        $categoryNames = $article->getCategories()->map(fn($category) => $category->getName())->toArray();
-
-        $data[] = [
-            'id' => $article->getId(),
-            'title' => htmlspecialchars($article->getTitle(), ENT_QUOTES),
-            'categories' => $categoryNames ? implode(', ', $categoryNames) : 'Aucune catégorie',
-            'commentsCount' => $article->getComments()->count(),
-            'likesCount' => $article->getLikes()->count(),
-            'createdAt' => $article->getCreatedAt()->format('d/m/Y H:i'),
-            'actions' => $this->renderView('article/_actions.html.twig', [
-                'article' => $article
-            ])
+        $columnMapping = [
+            0 => 'a.id',
+            1 => 'a.title',
+            2 => 'c.title',
+            5 => 'a.createdAt'
         ];
-    }
 
-    return $this->json([
-        'draw' => $draw,
-        'recordsTotal' => $results['totalCount'],
-        'recordsFiltered' => $results['filteredCount'],
-        'data' => $data
-    ]);
-}
+        $orderColumn = $columnMapping[$order['column']] ?? 'a.id';
+        $orderDir = $order['dir'] ?? 'desc';
+
+        $results = $articleRepository->findForDataTable($start, $length, $search, $orderColumn, $orderDir);
+
+        $data = [];
+        foreach ($results['data'] as $article) {
+            $categoryNames = $article->getCategories()->map(fn($category) => $category->getName())->toArray();
+
+            $data[] = [
+                'id' => $article->getId(),
+                'title' => htmlspecialchars($article->getTitle(), ENT_QUOTES),
+                'categories' => $categoryNames ? implode(', ', $categoryNames) : 'Aucune catégorie',
+                'commentsCount' => $article->getComments()->count(),
+                'likesCount' => $article->getLikes()->count(),
+                'createdAt' => $article->getCreatedAt()->format('d/m/Y H:i'),
+                'actions' => $this->renderView('article/_actions.html.twig', [
+                    'article' => $article
+                ])
+            ];
+        }
+
+        return $this->json([
+            'draw' => $draw,
+            'recordsTotal' => $results['totalCount'],
+            'recordsFiltered' => $results['filteredCount'],
+            'data' => $data
+        ]);
+    }
 
     #[Route('/articles/search', name: 'api_articles_search', methods: ['GET'])]
     public function search(Request $request, ArticleRepository $articleRepository): JsonResponse
@@ -123,43 +125,57 @@ public function list(Request $request, ArticleRepository $articleRepository): Js
         ], Response::HTTP_BAD_REQUEST);
     }
 
-    #[Route('/article/{id}/like', name: 'api_article_like', methods: ['POST'])]
-    public function likeArticle(
-        Article $article,
-        Request $request,
-        EntityManagerInterface $entityManager,
-        ArticleLikeRepository $likeRepository
-    ): JsonResponse {
-        $ip = $request->getClientIp();
+    
+    #[Route('/article/{id}/like', name: 'article_like', methods: ['POST'])]
+public function like(
+    Article $article, 
+    Request $request,
+    CsrfTokenManagerInterface $csrfTokenManager,
+    ArticleLikeRepository $likeRepository,
+    EntityManagerInterface $entityManager
+): JsonResponse {
+    error_log('Received token: ' . ($request->headers->get('X-CSRF-TOKEN') ?? $request->request->get('_token')));
+    error_log('Expected token: ' . $csrfTokenManager->getToken('like'.$article->getId())->getValue());
+
+    $token = $request->headers->get('X-CSRF-TOKEN') ?? 
+             json_decode($request->getContent(), true)['_token'] ?? null;
+
+    if (!$token || !$csrfTokenManager->isTokenValid(new CsrfToken('like'.$article->getId(), $token))) {
+        return $this->json([
+            'success' => false, 
+            'error' => 'Token CSRF invalide',
+            'received_token' => $token,
+            'expected_token' => $csrfTokenManager->getToken('like'.$article->getId())->getValue()
+        ], Response::HTTP_FORBIDDEN);
+    }
+
+        $ip = $request->getClientIp() ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 
         $existingLike = $likeRepository->findOneBy([
             'article' => $article,
             'ip' => $ip
         ]);
 
+        $liked = false;
+
         if ($existingLike) {
             $entityManager->remove($existingLike);
-            $entityManager->flush();
-
-            return new JsonResponse([
-                'success' => true,
-                'liked' => false,
-                'likesCount' => $article->getLikes()->count()
-            ]);
         } else {
             $like = new ArticleLike();
             $like->setArticle($article);
-            $like->setIp($ip);
+            $like->setIpAddress($ip);
             $like->setCreatedAt(new \DateTimeImmutable());
-
             $entityManager->persist($like);
-            $entityManager->flush();
-
-            return new JsonResponse([
-                'success' => true,
-                'liked' => true,
-                'likesCount' => $article->getLikes()->count()
-            ]);
+            $liked = true;
         }
+
+        $entityManager->flush();
+
+        return new JsonResponse([
+            'success' => true,
+            'liked' => $liked,
+            'likesCount' => $article->getLikes()->count(),
+            'message' => $liked ? 'Article liké!' : 'Like retiré!'
+        ]);
     }
 }

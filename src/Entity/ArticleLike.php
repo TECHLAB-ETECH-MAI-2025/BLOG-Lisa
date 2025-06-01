@@ -19,7 +19,8 @@ class ArticleLike
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'likes')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Article $article = null;
 
     public function getId(): ?int

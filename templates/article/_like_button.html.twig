@@ -1,0 +1,7 @@
+{# templates/article/_like_button.html.twig #}
+<button class="btn-like {{ isLiked ? 'liked' : '' }}" 
+        data-article-id="{{ article.id }}"
+        data-csrf-token="{{ csrf_token('like' ~ article.id) }}">
+    <i class="far fa-thumbs-up"></i>
+    <span class="like-count">{{ article.likes|length }}</span>
+</button>
