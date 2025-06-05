@@ -50,7 +50,7 @@
 
         
 <div class="like-section mb-4">
-    {% set isLiked = app.request.getClientIp() in article.likes|map(like => like.ip) %}
+    {% set isLiked = app.request.getClientIp() in article.likes|map(like => like.ipAddress) %}
     {% include 'article/_like_button.html.twig' with {
         article: article,
         isLiked: isLiked

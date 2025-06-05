@@ -126,56 +126,37 @@ class ArticleController extends AbstractController
     }
 
     
-    #[Route('/article/{id}/like', name: 'article_like', methods: ['POST'])]
-public function like(
-    Article $article, 
-    Request $request,
-    CsrfTokenManagerInterface $csrfTokenManager,
-    ArticleLikeRepository $likeRepository,
-    EntityManagerInterface $entityManager
-): JsonResponse {
-    error_log('Received token: ' . ($request->headers->get('X-CSRF-TOKEN') ?? $request->request->get('_token')));
-    error_log('Expected token: ' . $csrfTokenManager->getToken('like'.$article->getId())->getValue());
 
-    $token = $request->headers->get('X-CSRF-TOKEN') ?? 
-             json_decode($request->getContent(), true)['_token'] ?? null;
+    #[Route('/article/{id}/like', name: 'app_article_like', methods: ['POST'])]
+public function likeArticle(Request $request, Article $article, EntityManagerInterface $em): JsonResponse
+{
+    $userIp = $request->getClientIp();
+    $likeRepository = $em->getRepository(ArticleLike::class);
+    
+    // Recherche par ipAddress au lieu de ip
+    $existingLike = $likeRepository->findOneBy([
+        'article' => $article,
+        'ipAddress' => $userIp
+    ]);
 
-    if (!$token || !$csrfTokenManager->isTokenValid(new CsrfToken('like'.$article->getId(), $token))) {
-        return $this->json([
-            'success' => false, 
-            'error' => 'Token CSRF invalide',
-            'received_token' => $token,
-            'expected_token' => $csrfTokenManager->getToken('like'.$article->getId())->getValue()
-        ], Response::HTTP_FORBIDDEN);
+    if ($existingLike) {
+        $em->remove($existingLike);
+        $action = 'unliked';
+    } else {
+        $like = new ArticleLike();
+        $like->setArticle($article)
+             ->setIpAddress($userIp) // Utilisez setIpAddress()
+             ->setCreatedAt(new \DateTimeImmutable()); // Initialisez la date
+        $em->persist($like);
+        $action = 'liked';
     }
 
-        $ip = $request->getClientIp() ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $em->flush();
 
-        $existingLike = $likeRepository->findOneBy([
-            'article' => $article,
-            'ip' => $ip
-        ]);
-
-        $liked = false;
-
-        if ($existingLike) {
-            $entityManager->remove($existingLike);
-        } else {
-            $like = new ArticleLike();
-            $like->setArticle($article);
-            $like->setIpAddress($ip);
-            $like->setCreatedAt(new \DateTimeImmutable());
-            $entityManager->persist($like);
-            $liked = true;
-        }
-
-        $entityManager->flush();
-
-        return new JsonResponse([
-            'success' => true,
-            'liked' => $liked,
-            'likesCount' => $article->getLikes()->count(),
-            'message' => $liked ? 'Article liké!' : 'Like retiré!'
-        ]);
-    }
+    return $this->json([
+        'success' => true,
+        'action' => $action,
+        'likesCount' => $article->getLikes()->count()
+    ]);
+}
 }
