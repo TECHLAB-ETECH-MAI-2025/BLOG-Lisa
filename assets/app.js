@@ -9,35 +9,45 @@ document.addEventListener('DOMContentLoaded', () => {
             const likeCount = this.querySelector('.like-count');
 
             try {
+                console.log("Envoi like pour l'article:", articleId); // Debug
                 const response = await fetch(`/api/article/${articleId}/like`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-Token': csrfToken,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ _token: csrfToken })
+                        'Accept': 'application/json'
+                    }
                 });
 
-                if (!response.ok) throw new Error('Erreur réseau');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || "Erreur serveur");
+                }
 
                 const data = await response.json();
+                console.log("Réponse API:", data);
 
                 if (data.success) {
-
-                    this.classList.toggle('btn-primary');
-                    this.classList.toggle('btn-outline-primary');
-                    icon.classList.toggle('fas');
-                    icon.classList.toggle('far');
+                    if (data.isLiked) {
+                        this.classList.add('btn-primary');
+                        this.classList.remove('btn-outline-primary');
+                        icon.classList.add('fas');
+                        icon.classList.remove('far');
+                    } else {
+                        this.classList.remove('btn-primary');
+                        this.classList.add('btn-outline-primary');
+                        icon.classList.remove('fas');
+                        icon.classList.add('far');
+                    }
                     
                     if (likeCount) {
                         likeCount.textContent = data.likesCount;
                     }
                 } else {
-                    alert(data.message || "Erreur lors de l'action");
+                    alert(data.message || "Action échouée");
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert("Erreur réseau - Veuillez réessayer");
+                console.error('Erreur:', error);
+                alert(error.message || "Erreur réseau");
             }
         });
     });

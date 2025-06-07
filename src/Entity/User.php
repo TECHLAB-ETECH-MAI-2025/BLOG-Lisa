@@ -60,6 +60,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->isVerified = false;
         $this->messages = new ArrayCollection();
     }
+    
 
     public function getId(): ?int
     {
