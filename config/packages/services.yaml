@@ -1,0 +1,5 @@
+services:
+    App\Service\MercureService:
+        arguments:
+            $hub: '@mercure.hub.default'
+            
