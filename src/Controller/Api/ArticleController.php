@@ -145,8 +145,8 @@ public function likeArticle(Request $request, Article $article, EntityManagerInt
     } else {
         $like = new ArticleLike();
         $like->setArticle($article)
-             ->setIpAddress($userIp) // Utilisez setIpAddress()
-             ->setCreatedAt(new \DateTimeImmutable()); // Initialisez la date
+             ->setIpAddress($userIp)
+             ->setCreatedAt(new \DateTimeImmutable());
         $em->persist($like);
         $action = 'liked';
     }

@@ -1,54 +1,49 @@
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.btn-like').forEach(button => {
         button.addEventListener('click', async function(e) {
+
             e.preventDefault();
-            
+
             const articleId = this.dataset.articleId;
             const csrfToken = this.dataset.csrfToken;
             const icon = this.querySelector('i');
             const likeCount = this.querySelector('.like-count');
 
             try {
-                console.log("Envoi like pour l'article:", articleId); // Debug
                 const response = await fetch(`/api/article/${articleId}/like`, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-Token': csrfToken,
-                        'Accept': 'application/json'
-                    }
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ _token: csrfToken })
                 });
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || "Erreur serveur");
-                }
+                if (!response.ok) throw new Error('Erreur réseau');
 
                 const data = await response.json();
-                console.log("Réponse API:", data);
 
                 if (data.success) {
-                    if (data.isLiked) {
-                        this.classList.add('btn-primary');
-                        this.classList.remove('btn-outline-primary');
-                        icon.classList.add('fas');
-                        icon.classList.remove('far');
-                    } else {
-                        this.classList.remove('btn-primary');
-                        this.classList.add('btn-outline-primary');
-                        icon.classList.remove('fas');
-                        icon.classList.add('far');
-                    }
+
+                    this.classList.toggle('btn-primary');
+                    this.classList.toggle('btn-outline-primary');
+                    icon.classList.toggle('fas');
+                    icon.classList.toggle('far');
                     
                     if (likeCount) {
                         likeCount.textContent = data.likesCount;
                     }
                 } else {
-                    alert(data.message || "Action échouée");
+                    alert(data.message || "Erreur lors de l'action");
                 }
             } catch (error) {
-                console.error('Erreur:', error);
-                alert(error.message || "Erreur réseau");
+                console.error('Error:', error);
+                alert("Erreur réseau - Veuillez réessayer");
             }
         });
+
+
+
     });
+
 });
