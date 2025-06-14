@@ -22,3 +22,7 @@ Une présentation individuelle sera faite une fois le travail terminé.
 ## 📄 Licence
 
 Ce projet est sous licence MIT. Toute utilisation est libre et encouragée !
+## blocage
+Chat réel avec mercure, impossible de récupérer le token.
+![Capture d’écran du 2025-06-14 08-35-52](https://github.com/user-attachments/assets/48a4c0a3-14a5-4852-a0ce-0e051ef3c51d)
+
