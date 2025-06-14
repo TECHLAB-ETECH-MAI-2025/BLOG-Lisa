@@ -7,8 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Category;
-use App\Entity\Comment;
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 class Article
@@ -30,25 +28,24 @@ class Article
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\ManyToOne(inversedBy: 'articles')]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?Category $category = null;
-
+    #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: 'articles')]
+    private Collection $categories;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
-    #[ORM\OneToMany(
-        mappedBy: 'article',
-        targetEntity: Comment::class,
-        orphanRemoval: true,
-        cascade: ['remove']
-    )]
+    #[ORM\OneToMany(mappedBy: 'article', targetEntity: Comment::class, orphanRemoval: true, cascade: ['remove'])]
     private Collection $comments;
+
+    #[ORM\OneToMany(mappedBy: 'article', targetEntity: ArticleLike::class, orphanRemoval: true, cascade: ['remove'])]
+    private Collection $likes;
 
     public function __construct()
     {
+        $this->categories = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->likes = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -100,17 +97,6 @@ class Article
         return $this;
     }
 
-    public function getCategory(): ?Category
-    {
-        return $this->category;
-    }
-
-    public function setCategory(?Category $category): static
-    {
-        $this->category = $category;
-        return $this;
-    }
-
     public function getImage(): ?string
     {
         return $this->image;
@@ -122,9 +108,26 @@ class Article
         return $this;
     }
 
-    /**
-     * @return Collection<int, Comment>
-     */
+    public function getCategories(): Collection
+    {
+        return $this->categories;
+    }
+
+    public function addCategory(Category $category): self
+    {
+        if (!$this->categories->contains($category)) {
+            $this->categories->add($category);
+        }
+
+        return $this;
+    }
+
+    public function removeCategory(Category $category): self
+    {
+        $this->categories->removeElement($category);
+        return $this;
+    }
+
     public function getComments(): Collection
     {
         return $this->comments;
@@ -149,5 +152,36 @@ class Article
         }
 
         return $this;
+    }
+
+    public function getLikes(): Collection
+    {
+        return $this->likes;
+    }
+
+    public function addLike(ArticleLike $like): self
+    {
+        if (!$this->likes->contains($like)) {
+            $this->likes->add($like);
+            $like->setArticle($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLike(ArticleLike $like): self
+    {
+        if ($this->likes->removeElement($like)) {
+            if ($like->getArticle() === $this) {
+                $like->setArticle(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getLikesCount(): int
+    {
+        return $this->likes->count();
     }
 }

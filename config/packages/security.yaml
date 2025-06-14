@@ -48,6 +48,7 @@ security:
     - { path: ^/login, roles: PUBLIC_ACCESS }
     - { path: ^/logout, roles: PUBLIC_ACCESS }
     - { path: ^/$, roles: ROLE_USER }
+    - { path: ^/article/\d+/like, roles: PUBLIC_ACCESS }
 
   role_hierarchy:
     ROLE_ADMIN: ROLE_USER

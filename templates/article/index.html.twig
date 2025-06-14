@@ -2,38 +2,116 @@
 
 {% block title %}Liste des Articles{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('article_list') }}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('article_list') }}
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#articlesTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ path('api_articles_list') }}",
+                    type: "GET",
+                    data: function(d) {
+                        // Formatage des paramètres pour Symfony
+                        return {
+                            draw: d.draw,
+                            start: d.start,
+                            length: d.length,
+                            search: {
+                                value: d.search.value
+                            },
+                            order: [{
+                                column: d.order[0].column,
+                                dir: d.order[0].dir
+                            }]
+                        };
+                    },
+                    error: function(xhr, error, thrown) {
+                        console.error("Erreur DataTables:", xhr.responseText);
+                        $('#articlesTable').before(
+                            '<div class="alert alert-danger">Erreur lors du chargement des données. Veuillez rafraîchir la page.</div>'
+                        );
+                    }
+                },
+                columns: [
+                    { data: 'id' },
+                    { data: 'title' },
+                    { 
+                        data: 'categories',
+                        render: function(data, type, row) {
+                            return data || 'Aucune catégorie';
+                        }
+                    },
+                    { data: 'commentsCount' },
+                    { data: 'likesCount' },
+                    { data: 'createdAt' },
+                    { 
+                        data: 'actions',
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+                },
+                search: {
+                    regex: false
+                },
+                responsive: true,
+                initComplete: function() {
+                    // Masquer le loader une fois chargé
+                    $('.dataTables_processing').hide();
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block body %}
 <div class="container mt-5">
-    <h1 class="mb-4">Liste des Articles</h1>
-
-    <a href="{{ path('app_article_new') }}" class="btn btn-success mb-4">
-        Créer un article
-    </a>
-
-    {% for article in pagination %}
-        <div class="card mb-4">
-            <div class="card-header">
-                <h2>{{ article.title }}</h2>
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h1 class="mb-0">Liste des Articles</h1>
+        </div>
+        
+        <div class="card-body">
+            <div class="mb-4">
+                <a href="{{ path('app_article_new') }}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Créer un article
+                </a>
             </div>
-            <div class="card-body">
-                {% if article.image %}
-                    <img src="{{ asset('uploads/images/' ~ article.image) }}" alt="{{ article.title }}"
-                        class="img-fluid mb-3" style="max-height: 300px;">
-                {% endif %}
-                <p>{{ article.content|slice(0, 150) ~ '...' }}</p>
-                <a href="{{ path('app_article_show', { id: article.id }) }}" class="btn btn-primary">Lire la suite</a>
-            </div>
-            <div class="card-footer text-muted">
-                Publié le {{ article.createdAt|date('d/m/Y H:i') }}
+
+            <div class="table-responsive">
+                <table id="articlesTable" class="table table-bordered table-hover table-striped" style="width:100%">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Titre</th>
+                            <th>Catégories</th>
+                            <th>Commentaires</th>
+                            <th>J'aime</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Les données seront chargées via AJAX -->
+                    </tbody>
+                </table>
             </div>
         </div>
-    {% else %}
-        <p>Aucun article disponible.</p>
-    {% endfor %}
-
-    <div class="pagination-container d-flex justify-content-center mt-4">
-        {{ knp_pagination_render(pagination) }}
     </div>
-
 </div>
 {% endblock %}

@@ -21,10 +21,7 @@ class Category
     #[ORM\Column(length: 255)]
     private ?string $description = null;
 
-    /**
-     * @var Collection<int, Article>
-     */
-    #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'category')]
+    #[ORM\ManyToMany(targetEntity: Article::class, mappedBy: 'categories')]
     private Collection $articles;
 
     public function __construct()
@@ -67,22 +64,22 @@ class Category
         return $this->articles;
     }
 
-    public function addArticle(Article $article): static
+    public function addArticle(Article $article): self
     {
         if (!$this->articles->contains($article)) {
             $this->articles->add($article);
-            $article->setCategory($this);
+            $article->addCategory($this);
         }
+
         return $this;
     }
 
-    public function removeArticle(Article $article): static
+    public function removeArticle(Article $article): self
     {
         if ($this->articles->removeElement($article)) {
-            if ($article->getCategory() === $this) {
-                $article->setCategory(null);
-            }
+            $article->removeCategory($this);
         }
+
         return $this;
     }
 }

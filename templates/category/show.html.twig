@@ -16,7 +16,7 @@
             <hr>
 
             <h4>Articles liés :</h4>
-            {% if category.articles is not empty %}
+            {% if category.articles is defined and category.articles is not empty %}
             <ul class="list-group">
                 {% for article in category.articles %}
                 <li class="list-group-item bg-light d-flex text-dark justify-content-between align-items-center">

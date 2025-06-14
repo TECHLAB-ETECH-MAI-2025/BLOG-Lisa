@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  mercure:
+    image: dunglas/mercure:v0.15
+    restart: unless-stopped
+    environment:
+      SERVER_NAME: ':80'
+      MERCURE_PUBLISHER_JWT_KEY: 'd+fEYc6c8ZfHgBYuvWXLLYaq0eiuqBK4i8XFEbd4SsI='
+      MERCURE_SUBSCRIBER_JWT_KEY: 'd+fEYc6c8ZfHgBYuvWXLLYaq0eiuqBK4i8XFEbd4SsI='
+      MERCURE_EXTRA_DIRECTIVES: |
+        cors_origins *
+        publish_origins *
+        allow_anonymous
+        subscriptions
+    ports:
+      - "3000:80"
+    volumes:
+      - mercure_data:/data
+    networks:
+      - backend
+
+  database:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: blog
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: teania123TOP
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "blog", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgresql://postgres:teania123TOP@database:5432/blog?serverVersion=16&charset=utf8"
+      MERCURE_URL: "http://mercure/.well-known/mercure"
+      MERCURE_PUBLIC_URL: "http://localhost:3000/.well-known/mercure"
+      MERCURE_JWT_SECRET: "d+fEYc6c8ZfHgBYuvWXLLYaq0eiuqBK4i8XFEbd4SsI="
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8000:80"
+    depends_on:
+      database:
+        condition: service_healthy
+      mercure:
+        condition: service_started
+    networks:
+      - backend
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  postgres_data:
+  mercure_data:
+  mercure_config:
+
+networks:
+  backend:
+    driver: bridge
