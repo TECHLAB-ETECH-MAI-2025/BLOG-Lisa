@@ -11,12 +11,12 @@ services:
       MERCURE_EXTRA_DIRECTIVES: |
         cors_origins *
         publish_origins *
-        anonymous
+        allow_anonymous
+        subscriptions
     ports:
       - "3000:80"
     volumes:
       - mercure_data:/data
-      - mercure_config:/config
     networks:
       - backend
 
@@ -46,11 +46,12 @@ services:
     environment:
       DATABASE_URL: "postgresql://postgres:teania123TOP@database:5432/blog?serverVersion=16&charset=utf8"
       MERCURE_URL: "http://mercure/.well-known/mercure"
+      MERCURE_PUBLIC_URL: "http://localhost:3000/.well-known/mercure"
       MERCURE_JWT_SECRET: "d+fEYc6c8ZfHgBYuvWXLLYaq0eiuqBK4i8XFEbd4SsI="
     volumes:
       - .:/var/www/html
     ports:
-      - "8000:8000"
+      - "8000:80"
     depends_on:
       database:
         condition: service_healthy
@@ -58,19 +59,8 @@ services:
         condition: service_started
     networks:
       - backend
-
-#  nginx:
-#    image: nginx:alpine
-#    restart: unless-stopped
-#    ports:
-#      - "8080:80"
-#    volumes:
-#      - ./nginx.conf:/etc/nginx/nginx.conf
-#      - ./ssl:/etc/nginx/ssl
-#    depends_on:
-#      - mercure
-#    networks:
-#      - backend
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 volumes:
   postgres_data:

@@ -138,19 +138,23 @@ class ChatController extends AbstractController
 
 private function getConversationId(int $user1Id, int $user2Id): int
 {
-    $chatRepo = $this->entityManager->getRepository(Chat::class);
-
-    $chat = $chatRepo->findOneByUsers($user1Id, $user2Id);
-
-    if (!$chat) {
-        $chat = new Chat();
-        $chat->addUser($this->entityManager->getReference(User::class, $user1Id));
-        $chat->addUser($this->entityManager->getReference(User::class, $user2Id));
-        $this->entityManager->persist($chat);
+    $messageRepo = $this->entityManager->getRepository(Message::class);
+    $lastMessage = $messageRepo->findOneByUsers($user1Id, $user2Id);
+    
+    if (!$lastMessage) {
+        $message = new Message();
+        $message->setSender($this->entityManager->getReference(User::class, $user1Id));
+        $message->setReceiver($this->entityManager->getReference(User::class, $user2Id));
+        $message->setContent('Premier message de la conversation');
+        $message->setCreatedAt(new \DateTimeImmutable());
+        
+        $this->entityManager->persist($message);
         $this->entityManager->flush();
+        
+        return $message->getId();
     }
-
-    return $chat->getId();
+    
+    return $lastMessage->getId();
 }
 
 }

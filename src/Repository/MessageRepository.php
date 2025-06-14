@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Repository;
 
 use App\Entity\Message;
@@ -21,5 +22,17 @@ class MessageRepository extends ServiceEntityRepository
             ->orderBy('m.createdAt', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    public function findOneByUsers(int $user1Id, int $user2Id): ?Message
+    {
+        return $this->createQueryBuilder('m')
+            ->where('(m.sender = :user1 AND m.receiver = :user2) OR (m.sender = :user2 AND m.receiver = :user1)')
+            ->setParameter('user1', $user1Id)
+            ->setParameter('user2', $user2Id)
+            ->orderBy('m.createdAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

@@ -15,6 +15,14 @@ class MercureService
     }
 
     /**
+     * Génère un JWT pour Mercure
+     */
+    public function generateToken(): string
+    {
+        return $this->tokenProvider->getJwt();
+    }
+
+    /**
      * Publier une mise à jour vers un ou plusieurs topics
      *
      * @param string $topic   Le topic ou l'URI du topic
@@ -23,17 +31,18 @@ class MercureService
      * @param bool   $private Si la publication doit être privée
      */
     public function publish(string $topic, array $data, array $targets = [], bool $private = false): void
-    {
-        $update = new Update(
-            $topic,
-            json_encode($data, JSON_THROW_ON_ERROR),
-            $targets,
-            null,
-            $private ? Update::PRIVATE : Update::PUBLIC
-        );
-
-        $this->hub->publish($update);
-    }
+{
+    $update = new Update(
+        topics: $topic,
+        data: json_encode($data, JSON_THROW_ON_ERROR),
+        private: $private,
+        id: null,      
+        type: null, 
+        retry: null     
+    );
+    
+    $this->hub->publish($update);
+}
 
     /**
      * Publier une notification utilisateur

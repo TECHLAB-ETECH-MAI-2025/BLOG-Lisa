@@ -3,9 +3,9 @@
 namespace App\Form;
 
 use App\Entity\Comment;
+use App\Entity\Article;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -15,7 +15,12 @@ class CommentForm extends AbstractType
     {
         $builder
             ->add('author')
-            ->add('content');
+            ->add('content')
+            ->add('article', EntityType::class, [
+                'class' => Article::class,
+                'choice_label' => 'title',
+                'placeholder' => 'Choisir un article',
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

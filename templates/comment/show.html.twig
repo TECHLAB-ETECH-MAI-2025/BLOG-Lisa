@@ -15,8 +15,8 @@
             <p><strong>Créé le :</strong> {{ comment.createdAt ? comment.createdAt|date('d/m/Y H:i') : 'Date inconnue' }}</p>
         </div>
         <div class="card-footer d-flex justify-content-end gap-2">
-            <a href="{{ path('app_comment_contoller_index') }}" class="btn btn-secondary">Retour à la liste</a>
-            <a href="{{ path('app_comment_contoller_edit', {'id': comment.id}) }}" class="btn btn-primary">Modifier</a>
+            <a href="{{ path('app_comment_index') }}" class="btn btn-secondary">Retour à la liste</a>
+            <a href="{{ path('app_comment_edit', {'id': comment.id}) }}" class="btn btn-primary">Modifier</a>
             {{ include('comment_contoller/_delete_form.html.twig') }}
         </div>
     </div>

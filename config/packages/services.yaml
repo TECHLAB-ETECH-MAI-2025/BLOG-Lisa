@@ -2,4 +2,4 @@ services:
     App\Service\MercureService:
         arguments:
             $hub: '@mercure.hub.default'
-            
+            $tokenProvider: '@mercure.hub.default.jwt.provider'

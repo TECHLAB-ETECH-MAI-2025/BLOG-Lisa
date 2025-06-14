@@ -7,9 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Category;
-use App\Entity\Comment;
-use App\Entity\ArticleLike;
 
 #[ORM\Entity(repositoryClass: ArticleRepository::class)]
 class Article
@@ -37,20 +34,10 @@ class Article
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $image = null;
 
-    #[ORM\OneToMany(
-        mappedBy: 'article',
-        targetEntity: Comment::class,
-        orphanRemoval: true,
-        cascade: ['remove']
-    )]
+    #[ORM\OneToMany(mappedBy: 'article', targetEntity: Comment::class, orphanRemoval: true, cascade: ['remove'])]
     private Collection $comments;
 
-    #[ORM\OneToMany(
-        mappedBy: 'article',
-        targetEntity: ArticleLike::class,
-        orphanRemoval: true,
-        cascade: ['remove']
-    )]
+    #[ORM\OneToMany(mappedBy: 'article', targetEntity: ArticleLike::class, orphanRemoval: true, cascade: ['remove'])]
     private Collection $likes;
 
     public function __construct()
@@ -121,9 +108,6 @@ class Article
         return $this;
     }
 
-    /**
-     * @return Collection<int, Category>
-     */
     public function getCategories(): Collection
     {
         return $this->categories;
@@ -144,9 +128,6 @@ class Article
         return $this;
     }
 
-    /**
-     * @return Collection<int, Comment>
-     */
     public function getComments(): Collection
     {
         return $this->comments;
@@ -173,9 +154,6 @@ class Article
         return $this;
     }
 
-    /**
-     * @return Collection<int, ArticleLike>
-     */
     public function getLikes(): Collection
     {
         return $this->likes;
