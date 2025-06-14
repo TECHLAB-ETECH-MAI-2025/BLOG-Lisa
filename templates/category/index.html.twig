@@ -30,9 +30,10 @@
                         <a href="{{ path('app_category_show', {'id': category.id}) }}" class="btn btn-primary btn-sm me-2">
                             <i class="bi bi-eye"></i> Voir
                         </a>
-                        <a href="{{ path('app_category_edit', {'id': category.id}) }}" class="btn btn-warning btn-sm">
+                        <a href="{{ path('app_category_edit', {'id': category.id}) }}" class="btn btn-warning btn-sm me-2">
                             <i class="bi bi-pencil"></i> Modifier
                         </a>
+                       {{ include('category/_delete_form.html.twig') }}
                     </div>
                 </td>
             </tr>

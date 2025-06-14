@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Commentaires{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="mb-4">Liste des Commentaires</h1>
+
+    <div class="d-flex justify-content-end mb-3">
+        <a href="{{ path('app_comment_new') }}" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Créer un nouveau commentaire
+        </a>
+    </div>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+               
+                <th>Auteur</th>
+                <th>Contenu</th>
+                <th>Créé le</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for comment in pagination %}
+            <tr>
+                
+                <td>{{ comment.author }}</td>
+                <td>{{ comment.content | slice(0, 50) ~ '...' }}</td>
+                <td>{{ comment.createdAt ? comment.createdAt|date('d/m/Y H:i') : '' }}</td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a href="{{ path('app_comment_show', {'id': comment.id}) }}" class="btn btn-primary btn-sm me-2">
+                            <i class="bi bi-eye"></i> Voir
+                        </a>
+                        <a href="{{ path('app_comment_edit', {'id': comment.id}) }}" class="btn btn-warning btn-sm me-2">
+                            <i class="bi bi-pencil"></i> Modifier
+                        </a>
+                        {{ include('comment/_delete_form.html.twig') }}
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5" class="text-center">Aucun commentaire trouvé.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination-container d-flex justify-content-center mt-4">
+        {{ knp_pagination_render(pagination) }}
+    </div>
+</div>
+{% endblock %}

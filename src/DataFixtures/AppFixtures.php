@@ -47,7 +47,7 @@ class AppFixtures extends Fixture
             $article->setCreatedAt(new \DateTimeImmutable());
             $article->setUpdatedAt(null);
 
-            $article->setCategory($categories[array_rand($categories)]);
+            $article->addCategory($categories[array_rand($categories)]);
 
             $article->setImage($imageFiles[array_rand($imageFiles)]);
 

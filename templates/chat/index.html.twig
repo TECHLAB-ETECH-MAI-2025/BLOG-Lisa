@@ -1,0 +1,220 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Messagerie{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .chat-wrapper {
+            display: flex;
+            max-width: 1200px;
+            margin: 20px auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            height: 80vh;
+        }
+        
+        .users-list {
+            width: 300px;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+            background-color: white;
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .user-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .user-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .user-item.active {
+            background-color: #e3f2fd;
+            font-weight: bold;
+        }
+        
+        #chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .message {
+            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f0f8ff;
+        }
+        
+        .message-sender {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .message-time {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            margin-left: 5px;
+        }
+        
+        .message-content {
+            margin-top: 5px;
+            white-space: pre-wrap;
+        }
+        
+        #chat-form textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="chat-wrapper">
+        <!-- Liste des utilisateurs -->
+        <div class="users-list">
+            <div class="p-3 bg-light border-bottom">
+                <h4>Contacts</h4>
+            </div>
+            {% if users is defined and users is not empty %}
+                {% for user in users %}
+    <div
+        class="user-item {% if receiver and user.id == receiver.id %}active{% endif %}" onclick="window.location.href='{{ path('chat_index', {'receiverId': user.id}) }}'">
+        <div class="d-flex justify-content-between align-items-center">
+            <span>{{ user.email }}</span>
+            {% if unreadCounts[user.id] is defined and unreadCounts[user.id] > 0 %}
+                <span class="badge bg-primary rounded-pill">{{ unreadCounts[user.id] }}</span>
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}
+
+            {% else %}
+                <div class="p-3">Aucun contact disponible</div>
+            {% endif %}
+        </div>
+        
+        <!-- Zone de conversation -->
+        <div class="chat-container">
+            {% if receiver %}
+                <h2>Conversation avec {{ receiver.email }}</h2>
+                
+                <div id="chat-messages" data-last-message="{{ messages|length > 0 ? messages|last.id : 0 }}">
+                    {% if messages|length > 0 %}
+                        {% for message in messages %}
+                            <div class="message" data-message-id="{{ message.id }}">
+                                <span class="message-sender">{{ message.sender.email }}</span>
+                                <span class="message-time">{{ message.createdAt|date('H:i:s') }}</span>
+                                <div class="message-content">{{ message.content|nl2br }}</div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info">Aucun message échangé pour le moment.</div>
+                    {% endif %}
+                </div>
+                
+                {{ form_start(form, {'attr': {'id': 'chat-form', 'class': 'mt-3'}}) }}
+                    <div class="form-group">
+                        {{ form_widget(form.content, {
+                            'attr': {
+                                'class': 'form-control',
+                                'rows': 3,
+                                'placeholder': 'Écrivez votre message ici...'
+                            }
+                        }) }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Envoyer
+                    </button>
+                {{ form_end(form) }}
+            {% else %}
+                <div class="d-flex justify-content-center align-items-center h-100">
+                    <div class="text-center">
+                        <i class="fas fa-comments fa-4x text-muted mb-3"></i>
+                        <h4>Sélectionnez une conversation</h4>
+                        <p class="text-muted">Choisissez un contact dans la liste pour commencer à discuter</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% block javascripts %}
+    {{ parent() }}
+    <script>
+    const mercureService = {
+      eventSource: null,
+      subscribe(topic, onMessage) {
+        this.topic = topic;
+        this.onMessage = onMessage;
+      },
+      connect(token) {
+        if (this.eventSource) {
+          this.eventSource.close();
+        }
+        this.eventSource = new EventSource(`{{ mercure_publish_url }}?topic=${encodeURIComponent(this.topic)}&token=${token}`);
+        this.eventSource.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          this.onMessage(data, this.topic);
+        };
+        this.eventSource.onerror = (err) => console.error('Mercure EventSource error:', err);
+      }
+    };
+
+    function handleMessage(data, topic) {
+      console.log('🔔 Nouveau message reçu sur', topic, ':', data);
+
+      const chatMessages = document.getElementById('chat-messages');
+      if (!chatMessages) return;
+
+      // Eviter d'ajouter un message déjà présent (par id)
+      if (chatMessages.querySelector(`[data-message-id="${data.id}"]`)) return;
+
+      const div = document.createElement('div');
+      div.classList.add('message');
+      div.dataset.messageId = data.id;
+
+      div.innerHTML = `
+        <span class="message-sender">${data.senderEmail}</span>
+        <span class="message-time">${new Date(data.createdAt).toLocaleTimeString()}</span>
+        <div class="message-content">${data.content}</div>
+      `;
+
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function startChat() {
+      const res = await fetch('/chat/mercure/token');
+      if (!res.ok) {
+        console.error('Impossible de récupérer le token Mercure');
+        return;
+      }
+      const data = await res.json();
+      const token = data.token;
+
+      const topic = '{{ mercureTopics.chat }}'; // injecté depuis le contrôleur PHP
+      mercureService.subscribe(topic, handleMessage);
+      mercureService.connect(token);
+    }
+
+    startChat();
+    </script>
+    {% endblock %}
+{% endblock %}

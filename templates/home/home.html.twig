@@ -1,10 +1,14 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Bienvenue{% endblock %}
+
 {% block body %}
-    <div class="container d-flex flex-column align-items-center justify-content-center text-white" style="min-height: 80vh; background-image: url('https://source.unsplash.com/random/1920x1080/?nature,water'); background-size: cover; background-position: center;">
-        <div class="bg-dark p-5 rounded-3 opacity-75">
-            <h1 class="text-center mb-4">BIENVENUE, CECI EST UN BLOG D'ARTICLE</h1>
-            <a href="{{ path('app_login') }}" class="btn btn-primary w-100">SE CONNECTER</a>
-        </div>
-    </div>
+<div class="container mt-5 text-center">
+    <h1 class="mb-4 text-primary">Bienvenue sur notre plateforme !</h1>
+    <p class="lead">
+        Nous sommes ravis de vous accueillir. Cette plateforme vous permet de créer un compte, 
+        vous connecter et accéder à nos services de manière simple, rapide et sécurisée.
+    </p>
+    
+</div>
 {% endblock %}

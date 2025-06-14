@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .avatar-placeholder {
+            width: 100px;
+            height: 100px;
+            background-color: #4361ee;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="list-group">
+                <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
+                    Mon profil
+                </a>
+                <a href="{{ path('app_profile_edit') }}" class="list-group-item list-group-item-action">Modifier mon profil</a>
+                <a href="{{ path('app_profile_change_password') }}" class="list-group-item list-group-item-action">Changer mon mot de passe</a>
+                <a href="{{ path('app_logout') }}" class="list-group-item list-group-item-action text-danger">Déconnexion</a>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            {# Flash messages #}
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="avatar-placeholder mb-3">
+                        {{ app.user.firstName|slice(0, 1) }}{{ app.user.lastName|slice(0, 1) }}
+                    </div>
+                    <h4 class="card-title">{{ app.user.fullName }}</h4>
+                    <p class="card-text">{{ app.user.email }}</p>
+                    {% if app.user.isVerified %}
+                        <span class="badge bg-success">Email vérifié</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Email non vérifié</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h5>Informations personnelles</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>Prénom :</strong> {{ app.user.firstName|default('Non renseigné') }}</li>
+                        <li class="list-group-item"><strong>Nom :</strong> {{ app.user.lastName|default('Non renseigné') }}</li>
+                        <li class="list-group-item"><strong>Email :</strong> {{ app.user.email }}</li>
+                    </ul>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Informations du compte</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item"><strong>Date d'inscription :</strong> {{ app.user.createdAt|date('d/m/Y') }}</li>
+                        <li class="list-group-item">
+                            <strong>Rôle :</strong>
+                            {% if 'ROLE_ADMIN' in app.user.roles %}
+                                Administrateur
+                            {% else %}
+                                Utilisateur
+                            {% endif %}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Statut :</strong>
+                            {% if app.user.isVerified %}
+                                <span class="badge bg-success">Email vérifié</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Email non vérifié</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mt-4 text-end">
+                <a href="{{ path('app_profile_edit') }}" class="btn btn-primary">Modifier mon profil</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block body %}
+<style>
+    .radio-shadow-purple {
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        /* violet shadow */
+        transition: box-shadow 0.3s ease-in-out;
+    }
+
+    .radio-shadow-purple:checked {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        /* stronger when selected */
+    }
+</style>
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 90vh;">
+    <div class="col-md-7 col-lg-6">
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4 text-success">Créer un compte</h2>
+
+                {% for flash_error in app.flashes('verify_email_error') %}
+                <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+                {% endfor %}
+
+                {{ form_start(registrationForm) }}
+
+                <div class="mb-4 text-center">
+                    <label class="form-label mb-2">Type de compte</label>
+                    <div class="d-flex justify-content-center">
+                        {% for choice in registrationForm.role %}
+                        <div class="form-check form-check-inline mx-2">
+                            {{ form_widget(choice, {'attr': {'class': 'form-check-input radio-shadow-purple'}}) }}
+                            {{ form_label(choice, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-danger small mt-1">{{ form_errors(registrationForm.role) }}</div>
+                </div>
+
+
+                <div class="mb-3">
+                    {{ form_label(registrationForm.firstName, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(registrationForm.firstName, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small">{{ form_errors(registrationForm.firstName) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(registrationForm.lastName, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(registrationForm.lastName, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small">{{ form_errors(registrationForm.lastName) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(registrationForm.email, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small">{{ form_errors(registrationForm.email) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(registrationForm.plainPassword.first, 'Mot de passe', {'label_attr': {'class':
+                    'form-label'}}) }}
+                    {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small">{{ form_errors(registrationForm.plainPassword.first) }}</div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form_label(registrationForm.plainPassword.second, 'Répétez le mot de passe', {'label_attr':
+                    {'class': 'form-label'}}) }}
+                    {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'form-control'}}) }}
+                    <div class="text-danger small">{{ form_errors(registrationForm.plainPassword.second) }}</div>
+                </div>
+
+                <div class="mb-3 form-check">
+                    {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input'}}) }}
+                    {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                    <div class="text-danger small">{{ form_errors(registrationForm.agreeTerms) }}</div>
+                </div>
+
+
+
+                <button type="submit" class="btn btn-success w-100">S'inscrire</button>
+
+                {{ form_end(registrationForm) }}
+
+                <div class="text-center mt-3">
+                    <p>Vous avez déjà un compte ?
+                        <a href="{{ path('app_login') }}" class="btn btn-outline-primary btn-sm ms-2">Se connecter</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

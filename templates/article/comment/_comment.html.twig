@@ -1,0 +1,10 @@
+{# templates/comment/_comment.html.twig #}
+<div class="card mb-3">
+    <div class="card-header d-flex justify-content-between">
+        <strong>{{ comment.author }}</strong>
+        <small class="text-muted">{{ comment.createdAt|date('d/m/Y H:i') }}</small>
+    </div>
+    <div class="card-body">
+        <p class="card-text">{{ comment.content|nl2br }}</p>
+    </div>
+</div>

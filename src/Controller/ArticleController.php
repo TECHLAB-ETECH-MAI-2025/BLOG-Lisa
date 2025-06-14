@@ -13,6 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use App\Entity\Comment;
 use App\Form\CommentForm;
 use Knp\Component\Pager\PaginatorInterface;
+use App\Form\CommentType;
 
 #[Route('/article')]
 final class ArticleController extends AbstractController
@@ -64,29 +65,29 @@ final class ArticleController extends AbstractController
         ]);
     }
 
+#[Route('/{id}', name: 'app_article_show', methods: ['GET', 'POST'])]
+public function show(Request $request, Article $article, EntityManagerInterface $em): Response
+{
+    $comment = new Comment();
+    $comment->setArticle($article);
+    $comment->setCreatedAt(new \DateTimeImmutable());
+    
+    $form = $this->createForm(CommentType::class, $comment);
+    $form->handleRequest($request);
 
-    #[Route('/{id}', name: 'app_article_show', methods: ['GET', 'POST'])]
-    public function show(Request $request, Article $article, EntityManagerInterface $em): Response
-    {
-        $comment = new Comment();
-        $comment->setArticle($article);
-        $comment->setCreatedAt(new \DateTimeImmutable());
-
-        $form = $this->createForm(CommentForm::class, $comment);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->persist($comment);
-            $em->flush();
-
-            return $this->redirectToRoute('app_article_show', ['id' => $article->getId()]);
-        }
-
-        return $this->render('article/show.html.twig', [
-            'article' => $article,
-            'commentForm' => $form->createView(),
-        ]);
+    if ($form->isSubmitted() && $form->isValid()) {
+        $em->persist($comment);
+        $em->flush();
+        
+        $this->addFlash('success', 'Merci pour votre commentaire !');
+        return $this->redirectToRoute('app_article_show', ['id' => $article->getId()]);
     }
+
+    return $this->render('article/show.html.twig', [
+        'article' => $article,
+        'commentForm' => $form->createView(),
+    ]);
+}
     #[Route('/{id}/edit', name: 'app_article_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Article $article, EntityManagerInterface $entityManager): Response
     {

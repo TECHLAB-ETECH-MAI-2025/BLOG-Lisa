@@ -1,82 +1,122 @@
+{# templates/article/show.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Détail de l'Article{% endblock %}
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+{{ encore_entry_link_tags('article') }}
+<style>
+    /* Nouveau style pour image fixe */
+    .fixed-size-image {
+        width: 500px; 
+        height: 500px;
+        object-fit: cover;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: block;
+        margin: 0 auto 20px;
+    }
+    
+    .no-image-box {
+        width: 500px;
+        height: 500px;
+        background: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        border-radius: 6px;
+    }
+</style>
+{% endblock %}
 
 {% block body %}
 <div class="container mt-5">
+    <a href="{{ path('app_article_index') }}" class="btn btn-secondary mb-4">← Retour à la liste</a>
+    
     <div class="card">
-        <div class="card-header">
-            <h2>{{ article.title }}</h2>
-        </div>
         <div class="card-body">
-            <div class="row">
-                {% if article.image %}
-                <div class="col-md-4">
-                    <img src="{{ asset('uploads/images/' ~ article.image) }}" alt="{{ article.title }}"
-                        class="img-fluid rounded">
-                </div>
-                {% else %}
-                <div class="col-md-4">
-                    <img src="{{ asset('images/default.png') }}" alt="Image par défaut" class="img-fluid rounded">
-                </div>
-                {% endif %}
-                <div class="col-md-8">
-                    <p><strong>Catégorie :</strong> {{ article.category.name }}</p>
-                    <p><strong>Contenu :</strong> {{ article.content }}</p>
-                    <p><strong>Date de création :</strong> {{ article.createdAt ? article.createdAt|date('d/m/Y H:i') :
-                        'Non définie' }}</p>
-                    <p><strong>Dernière mise à jour :</strong> {{ article.updatedAt ? article.updatedAt|date('d/m/Y
-                        H:i') : 'Non modifié' }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="card-footer mb-4">
-            <div class="d-flex justify-content-end gap-2">
-                <a href="{{ path('app_article_index') }}" class="btn btn-secondary">Retour à la liste</a>
-                <a href="{{ path('app_article_edit', {'id': article.id}) }}" class="btn btn-primary">Modifier</a>
-                {{ include('article/_delete_form.html.twig') }}
-            </div>
-
-        </div>
-        <div class="container mt-4">
-            <h3 class="mb-4">Commentaires</h3>
-
-            {% for comment in article.comments %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title"> Auteur : {{ comment.author }}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted"> Publié le : {{ comment.createdAt|date('d/m/Y H:i') }}</h6>
-                    <p class="card-text">{{ comment.content }}</p>
-                </div>
-            </div>
+            {# Section Image avec taille fixe #}
+            {% if article.image %}
+                <img src="{{ asset('uploads/images/' ~ article.image) }}" 
+                     alt="Image de l'article {{ article.title }}" 
+                     class="fixed-size-image">
             {% else %}
-            <p>Aucun commentaire pour le moment.</p>
-            {% endfor %}
-
-            <div class="card mt-5 mx-auto" style="max-width: 600px;">
-                <div class="card-header text-center">
-                    <h4>Laisser un commentaire</h4>
+                <div class="no-image-box">
+                    <i class="fas fa-image text-muted"></i>
+                    <small class="text-muted mt-2">Aucune image</small>
                 </div>
-                <div class="card-body">
-                    {{ form_start(commentForm) }}
-                    <div class="mb-3">
-                         {{ form_label(commentForm.author) }}
-                        {{ form_widget(commentForm.author, {'attr': {'class': 'form-control'}}) }}
-                    </div>
-                    <div class="mb-3">
-                        {{ form_label(commentForm.content) }}
-                        {{ form_widget(commentForm.content, {'attr': {'class': 'form-control', 'rows': 4}}) }}
-                    </div>
-                    <div class="text-center">
-                        <button class="btn btn-success">Commenter</button>
-                    </div>
-                    {{ form_end(commentForm) }}
+            {% endif %}
+            
+            {# Reste du contenu inchangé #}
+            <h1 class="mb-3">{{ article.title }}</h1>
+            
+            <div class="mb-3">
+                <span class="badge bg-primary">{{ article.likes|length }} J'aime</span>
+                <span class="text-muted ms-2">
+                    Publié le {{ article.createdAt|date('d/m/Y H:i') }}
+                </span>
+            </div>
+
+            <div class="article-content mb-4">
+                <p>{{ article.content|nl2br }}</p>
+            </div>
+
+            {# Section Catégories #}
+            {% if article.categories is not empty %}
+            <div class="mb-4">
+                <strong>Catégories :</strong>
+                <div class="mt-2">
+                    {% for category in article.categories %}
+                    <span class="badge bg-info me-2">{{ category.name }}</span>
+                    {% endfor %}
                 </div>
             </div>
+            {% endif %}
+
+            <hr>
+
+            {# Section Like #}
+            <div class="like-section mb-4">
+                {% set isLiked = app.request.getClientIp() in article.likes|map(like => like.ipAddress) %}
+                {% include 'article/_like_button.html.twig' with {
+                    article: article,
+                    isLiked: isLiked
+                } %}
+            </div>
+
+            {# Section Commentaires #}
+            <h3>Commentaires ({{ article.comments|length }})</h3>
+            
+            {# Formulaire de commentaire #}
+            <div class="mt-3 mb-4">
+                <h4>Ajouter un commentaire</h4>
+                {{ form_start(commentForm, {'attr': {'class': 'mb-4'}}) }}
+                <div class="mb-3">
+                    {{ form_label(commentForm.author) }}
+                    {{ form_widget(commentForm.author, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(commentForm.author) }}
+                </div>
+                <div class="mb-3">
+                    {{ form_label(commentForm.content) }}
+                    {{ form_widget(commentForm.content, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+                    {{ form_errors(commentForm.content) }}
+                </div>
+                <button type="submit" class="btn btn-primary">Publier</button>
+                {{ form_end(commentForm) }}
+            </div>
+
+            {# Liste des commentaires #}
+            {% if article.comments|length > 0 %}
+                {% for comment in article.comments|sort((a, b) => b.createdAt <=> a.createdAt) %}
+                    {% include 'article/comment/_comment.html.twig' with { comment: comment } %}
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">Aucun commentaire pour le moment. Soyez le premier à réagir !</p>
+            {% endif %}
         </div>
-
     </div>
-
-
 </div>
 {% endblock %}
